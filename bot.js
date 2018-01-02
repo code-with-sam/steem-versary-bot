@@ -45,15 +45,41 @@ function processActiveUsers(users){
   })
 }
 
-getAniversaryData()
-  .then(data => processNamesToAccounts(data))
-  .then(data => processActiveUsers(data))
-  .then(data => {
-    let active = data;
-    let activeNames = data.map(user => user.name );
-    console.log( activeNames )
-    console.log( active.length )
-  })
+function getLatestPost(users){
+  let posts = [];
+  users.forEach(function (userName,i,arr){
+
+    posts.push( new Promise((resolve, reject) => {
+      steem.api.getDiscussionsByAuthorBeforeDate(userName,null, new Date().toISOString().split('.')[0],1, (err, result) => {
+          resolve( result )
+      })
+    }))
+  });
+  // console.log(posts)
+
+  Promise.all(posts)
+    .then(data => {
+      console.log(data)
+    })
+}
+getLatestPost(['sambillingham', 'utopian-io'])
+
+
+    // steem.api.getDiscussionsByAuthorBeforeDate('sambillingham',null, new Date().toISOString().split('.')[0],1, function(err, result){
+    //   console.log(result);
+    // })
+
+
+// getAniversaryData()
+//   .then(data => processNamesToAccounts(data))
+//   .then(data => processActiveUsers(data))
+//   .then(data => {
+//     let active = data;
+//     let activeNames = data.map(user => user.name );
+//     console.log( activeNames )
+//     console.log( active.length )
+//   })
+
 
 
 // get latest post of each user who has post in the last 6 days

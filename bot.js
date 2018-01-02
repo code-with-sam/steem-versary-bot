@@ -15,22 +15,30 @@ let lastYearTomorrow = dateLastYearTomorrow.getFullYear()+'/'+(dateLastYearTomor
 let sqlQuery = `SELECT * FROM TxAccountCreates WHERE timestamp >= '${lastYeaToday}' AND timestamp < '${lastYearTomorrow}' ORDER BY CONVERT(DATE, timestamp) DESC`
 
 function getAniversaryData(){
-// {url:'https://sql.steemhelpers.com/ap', formData: {query: sqlQuery}}
-      rp.post( {
-        url: 'https://sql.steemhelpers.com/api',
-        form : { query : sqlQuery },
-        method: 'POST'
-      })
-      .then(function (data) {
-          console.log(data)
-      })
-      .catch(function (err) {
-          // POST failed...
-      });
+    return rp.post( {
+      url: 'https://sql.steemhelpers.com/api',
+      form : { query : sqlQuery },
+      method: 'POST'
+    })
 }
 
+function processNamesToAccounts(data){
+  let json = JSON.parse(data)
+  let userNames = json.rows.map(user => user.new_account_name)
+  return new Promise((resolve, reject) => {
+    steem.api.getAccounts(userNames, (err, response) => {
+      resolve(response)
+    })
+  })
+}
+
+
+
 getAniversaryData()
-  // .then(data => console.log(data))
+  .then(data => processNamesToAccounts(data))
+  .then(data => {
+    console.log( data)
+  })
 
 
 // get latest post of each user who has post in the last 6 days

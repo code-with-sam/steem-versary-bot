@@ -44,86 +44,41 @@ function processActiveUsers(users){
     resolve(activeUsers);
   })
 }
-//
-// function getLatestPost(users){
-//   let posts = [];
-//   users.forEach(function (userName,i,arr){
-//
-//     posts.push( new Promise((resolve, reject) => {
-//       steem.api.getDiscussionsByAuthorBeforeDate(userName,null, new Date().toISOString().split('.')[0],1, (err, result) => {
-//           resolve( result )
-//       })
-//     }))
-//   });
-//
-//   Promise.all(posts)
-//     .then(data => {
-//       data.forEach( (post) => {
-//         console.log(post[0].title)
-//       })
-//     })
-// }
-// getLatestPost(['sambillingham', 'utopian-io'])
 
-
-// getAniversaryData()
-//   .then(data => processNamesToAccounts(data))
-//   .then(data => processActiveUsers(data))
-//   .then(data => {
-//     let active = data;
-//     let activeNames = data.map(user => user.name );
-//     console.log( activeNames )
-//     console.log( active.length )
-//   })
-
-
-
-//
 function getLatestPost(users){
   return new Promise((resolvePosts, reject) => {
-  let posts = [];
-  users.forEach( function(userName,i,arr) {
+      let posts = [];
+      users.forEach(function (userName,i,arr){
+        posts.push( new Promise((resolve, reject) => {
+          steem.api.getDiscussionsByAuthorBeforeDate(userName,null, new Date().toISOString().split('.')[0],1, (err, result) => {
+              resolve( result )
+          })
+        }))
+      });
 
-    posts.push( new Promise((resolve, reject) => {
-      steem.api.getDiscussionsByAuthorBeforeDate(userName,null, new Date().toISOString().split('.')[0],1, (err, result) => {
-          resolve( result )
-      })
-    }))
-  });
-
-  Promise.all(posts)
-    .then(data => {
-      resolvePosts(data)
-    })
+      Promise.all(posts).then(data => resolvePosts(data))
   })
 }
 
 
-getLatestPost(['sambillingham'])
-      .then(data => {
+
+
+
+
+getAniversaryData()
+  .then(data => processNamesToAccounts(data))
+  .then(data => processActiveUsers(data))
+  .then(data => {
+    let activeUsers = data;
+    let activeNames = activeUsers.map(user => user.name );
+    console.log(activeNames);
+    getLatestPost(activeNames).then(data => {
           data.forEach( (post) => {
-            console.log(post[0].title)
+            console.log(post[0].url)
           })
-      })
+        })
 
-//
-// getAniversaryData()
-//   .then(data => processNamesToAccounts(data))
-//   .then(data => processActiveUsers(data))
-//   .then(data => {
-//     let activeUsers = data;
-//     let activeNames = data.map(user => activeUsers.name );
-//     getLatestPost(activeNames)
-//       .then(data => {
-//         console.log( activeNames )
-//           data.forEach( (post) => {
-//             console.log(post.title)
-//           })
-//       })
-//   })
-
-
-// getLatestPost(['sambillinghan'])
+  })
 
 
 // get latest post of each user who has post in the last 6 days

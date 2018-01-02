@@ -3,6 +3,7 @@
 const moment = require('moment');
 const req = require('request');
 const rp = require('request-promise-native');
+const steem = require('steem');
 
 
 // get list of relevant versary users from steemSQL
@@ -32,12 +33,26 @@ function processNamesToAccounts(data){
   })
 }
 
+function processActiveUsers(users){
+  return new Promise((resolve, reject) => {
 
+    let now = moment().valueOf();
+    let sixDaysInSeconds = ( 6 * 24 * 60 * 60 * 1000)
+    let activeUsers = users.filter( user => {
+        return moment(user.last_root_post).valueOf() >= (now - sixDaysInSeconds)
+    })
+    resolve(activeUsers);
+  })
+}
 
 getAniversaryData()
   .then(data => processNamesToAccounts(data))
+  .then(data => processActiveUsers(data))
   .then(data => {
-    console.log( data)
+    let active = data;
+    let activeNames = data.map(user => user.name );
+    console.log( activeNames )
+    console.log( active.length )
   })
 
 

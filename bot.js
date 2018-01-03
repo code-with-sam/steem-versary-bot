@@ -6,6 +6,7 @@ const rp = require('request-promise-native');
 const steem = require('steem');
 const prettyjson = require('prettyjson');
 
+
 // get list of relevant versary users from steemSQL
 let dateToday = new Date();
 let dateLastYear = new Date(dateToday.getTime() - (365 * 24 * 60 * 60 * 1000));
@@ -60,28 +61,29 @@ function getLatestPost(users){
   })
 }
 
-
-
-
-
-
+// get latest post of each user who has post in the last 6 days
 getAniversaryData()
   .then(data => processNamesToAccounts(data))
   .then(data => processActiveUsers(data))
   .then(data => {
     let activeUsers = data;
+    let activeUsersCount = data.length;
+    let votesPerDay = 10;
     let activeNames = activeUsers.map(user => user.name );
+    let voteWeightPerUser = Math.floor( (votesPerDay/activeUsersCount) * 100 * 100 )
+
+
     console.log(activeNames);
     getLatestPost(activeNames).then(data => {
           data.forEach( (post) => {
             console.log(post[0].url)
+            console.log(post[0].author)
+
+
           })
         })
 
   })
-
-
-// get latest post of each user who has post in the last 6 days
 
 // calculate vote share per user
 

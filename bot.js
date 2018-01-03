@@ -21,7 +21,7 @@ getAniversaryData()
   .then(data => getLatestPost(data))
       .then(data => {
         sendVotes(data).then(data => console.log(data))
-        // sendComments(data).then(data => console.log(data))
+        sendComments(data).then(data => console.log(data))
       })
 
 function getAniversaryData(){
@@ -101,10 +101,13 @@ function getLatestPost(users){
                             console.log(author, permalink )
               votePromises.push(
                   new Promise((resolve, reject) => {
-                      steem.broadcast.vote(BOT_ACCOUNT_WIF, BOT_ACCOUNT_NAME, author, permalink, voteWeight, function(err, result) {
+                      setTimeout( () => {
+                        steem.broadcast.vote(BOT_ACCOUNT_WIF, BOT_ACCOUNT_NAME, author, permalink, voteWeight, function(err, result) {
 
                           resolve(result);
-                      });
+                        });
+                      }, i * API_MIN_VOTE_INTERVAL )
+
                   })
               )
           })
@@ -169,12 +172,17 @@ function getLatestPost(users){
           ];
           commentPromises.push(
               new Promise((resolve, reject) => {
-                  steem.broadcast.send(
-                    { operations: operations, extensions: [] },
-                    { posting: BOT_ACCOUNT_WIF },
-                    (err, result) => {
-                        resolve(result);
-                    })
+                  setTimeout( () => {
+
+                      steem.broadcast.send(
+                          { operations: operations, extensions: [] },
+                          { posting: BOT_ACCOUNT_WIF },
+                          (err, result) => {
+                              resolve(result);
+                          }
+                      )
+
+                  }, i * API_MIN_COMMENT_INTERVAL )
               })
           )
           })

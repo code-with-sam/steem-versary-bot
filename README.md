@@ -5,7 +5,17 @@ steemversary bot rewards steem users on every year after the creation of their a
 ### How To
 steemversary is a javascript powered bot, while there is no reason why it can't be adapted ot comiled for the browser this repo supports a node.js enviroment.
 
+change ```config.example.js``` to ```config.js``` and add your username and private posting key
 
+e.g
+```
+let config = {
+  username : 'yourusernamehere',
+  postingKey : 'yourprivatepostingkeyhere'
+}
+```
+
+Run the bot with
 ```
 npm install
 node bot.js

@@ -49,9 +49,12 @@ function processActiveUsers(users){
 }
 
 function getLatestPost(users){
+  // console.log(users)
+  var userNames = users.map(user => user.name);
+  console.log(userNames);
   return new Promise((resolvePosts, reject) => {
       let posts = [];
-      users.forEach(function (userName,i,arr){
+      userNames.forEach(function (userName,i,arr){
         posts.push( new Promise((resolve, reject) => {
           steem.api.getDiscussionsByAuthorBeforeDate(userName,null, new Date().toISOString().split('.')[0],1, (err, result) => {
               resolve( result )
@@ -63,32 +66,41 @@ function getLatestPost(users){
   })
 }
 
-get latest post of each user who has post in the last 6 days
+// get latest post of each user who has post in the last 6 days
 getAniversaryData()
   .then(data => processNamesToAccounts(data))
   .then(data => processActiveUsers(data))
-  .then(data => {
-    let activeUsers = data;
-    let activeUsersCount = data.length;
+  .then(data => getLatestPost(data))
+  // .then(data => sendVotes(data))
+
+  function calcVoteWeight(posts){
+    let totalActiveAuthors = posts.length;
     let votesPerDay = 10;
-    let activeNames = activeUsers.map(user => user.name );
-    let voteWeightPerUser = Math.floor( (votesPerDay/activeUsersCount) * 100 * 100 )
+    let minVoteWeightPerUser = Math.floor( (votesPerDay/totalActiveAuthors) * 100 * 100 )
+    return minVoteWeightPerUser > 10000 ? 10000 : minVoteWeightPerUser
+  }
 
+  function sendVotes(activePosts){
 
-    console.log(activeNames);
-    getLatestPost(activeNames).then(data => {
+      let voteWeightPerUser = calcVoteWeight(activePosts);
 
-
-          data.forEach( (post) => {
-            // console.log(post[0].url.substring(1))
-            // console.log(post[0].author)
+      let votePromises = [];
+      return new Promise((resolveVotes, reject) => {
+          activePosts.forEach((post,i,arr) => {
+              let permalink = post[0].url.substring(1)
+              let author = post[0].author
+              let voteWeight = voteWeightPerUser
+              vote.Promises.push(
+                  new Promise((resolve, reject) => {
+                      steem.broadcast.vote(BOT_ACCOUNT_WIF, BOT_ACCOUNT_NAME, author, permalink, voteWeight, function(err, result) {
+                          resolve(result);
+                      });
+                  })
+              )
           })
-        })
-
-  })
-console.log(BOT_ACCOUNT_NAME)
-// console.log(BOT_ACCOUNT_WIF)
-
+          Promise.all(votePromises).then(data => resolveVotes(data))
+      })
+  }
 
   function randomString() {
     return '_' + Math.random().toString(36).substr(2, 16);

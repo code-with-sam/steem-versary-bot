@@ -4,7 +4,6 @@ const moment = require('moment');
 const req = require('request');
 const rp = require('request-promise-native');
 const steem = require('steem');
-const prettyjson = require('prettyjson');
 
 const BOT_ACCOUNT_NAME = '';
 const BOT_ACCOUNT_WIF = ''
@@ -18,7 +17,7 @@ getAniversaryData()
   .then(data => getLatestPost(data))
       .then(data => {
         sendVotes(data).then(data => console.log(data))
-        sendComments(data).then(data => console.log(data))
+        // sendComments(data).then(data => console.log(data))
       })
 
 function getAniversaryData(){
@@ -91,14 +90,16 @@ function getLatestPost(users){
 
       return new Promise((resolveVotes, reject) => {
           activePosts.forEach((post,i,arr) => {
-              let permalink = post[0].url.substring(1)
+              let urlParts  = post[0].url.split("/");
+              let permalink = urlParts.pop();
               let author = post[0].author
               let voteWeight = voteWeightPerUser
+                            console.log(author, permalink )
               votePromises.push(
                   new Promise((resolve, reject) => {
                       steem.broadcast.vote(BOT_ACCOUNT_WIF, BOT_ACCOUNT_NAME, author, permalink, voteWeight, function(err, result) {
 
-                          resolve([err,result]);
+                          resolve(result);
                       });
                   })
               )
@@ -128,8 +129,11 @@ function getLatestPost(users){
       return new Promise((resolveComments, reject) => {
         activePosts.forEach((post,i,arr) => {
             let uniqueString = randomString();
-            let permalink = post[0].url.substring(1)
+            let urlParts  = post[0].url.split("/");
+            let permalink = urlParts.pop();
             let author = post[0].author
+            console.log(author, permalink )
+
             let operations = [
               ['comment',
               {

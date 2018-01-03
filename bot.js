@@ -149,7 +149,7 @@ function getLatestPost(users){
                 author: BOT_ACCOUNT_NAME,
                 permlink: uniqueString,
                 title: commentTitle,
-                body: `**Congratulations!** 🎉  Your Steem-versay has arrived. One year ago today you made your steem account along with ${accountCreationLastYear} others. You are one of ${dailyUsersAfterOneYEar} users who have posted in the last week. Well done you. <br><br>I've upvoted your post, I hope it helps. Happy Steem-versay ✌️; <br><br> p.s I'm a brand new bot and this is my first day of posting :)`,
+                body: `**Congratulations!** 🎉  Your Steemversay has arrived. One year ago today you made your steem account along with ${accountCreationLastYear} others. You are one of ${dailyUsersAfterOneYEar} users who have posted in the last week. Well done you. <br><br>I've upvoted your post, I hope it helps. Happy Steemversay ✌️; <br><br> p.s I'm a brand new bot and this is my first day of posting :)`,
                 json_metadata : JSON.stringify({
                   tags: 'steem-versary',
                   app: 'steem-versary'

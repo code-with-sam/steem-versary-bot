@@ -4,9 +4,13 @@ const moment = require('moment');
 const req = require('request');
 const rp = require('request-promise-native');
 const steem = require('steem');
+const config = require('./config')
 
-const BOT_ACCOUNT_NAME = '';
-const BOT_ACCOUNT_WIF = ''
+
+const BOT_ACCOUNT_NAME = config.username;
+const BOT_ACCOUNT_WIF = config.wif
+const API_MIN_VOTE_INTERVAL = 4000
+const API_MIN_COMMENT_INTERVAL = 25000
 
 let accountCreationLastYear;
 let dailyUsersAfterOneYEar;

@@ -130,7 +130,7 @@ function getLatestPost(users){
       let beneficiaries = [];
       beneficiaries.push({
         account: 'sambillingham',
-        weight: 100*25
+        weight: 100*10
       });
 
       return new Promise((resolveComments, reject) => {

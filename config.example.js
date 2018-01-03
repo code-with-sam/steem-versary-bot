@@ -1,6 +1,7 @@
 let config = {
   username : 'yourusernamehere',
-  postingKey : 'yourprrivatepostingkeyhere'
+  postingKey : 'yourprrivatepostingkeyhere',
+  beneficiary: 'yournamehere'
 }
 
 module.exports =  config

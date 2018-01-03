@@ -129,7 +129,7 @@ function getLatestPost(users){
       let commentTitle = 'Your Steem-Versay has arrived, Congratulations';
       let beneficiaries = [];
       beneficiaries.push({
-        account: 'sambillingham',
+        account: config.beneficiary,
         weight: 100*10
       });
 

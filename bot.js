@@ -9,6 +9,17 @@ const prettyjson = require('prettyjson');
 const BOT_ACCOUNT_NAME = '';
 const BOT_ACCOUNT_WIF = ''
 
+let accountCreationLastYear;
+let dailyUsersAfterOneYEar;
+
+getAniversaryData()
+  .then(data => processNamesToAccounts(data))
+  .then(data => processActiveUsers(data))
+  .then(data => getLatestPost(data))
+      .then(data => {
+        sendVotes(data).then(data => console.log(data))
+        sendComments(data).then(data => console.log(data))
+      })
 
 function getAniversaryData(){
     // get list of relevant versary users from steemSQL
@@ -44,14 +55,14 @@ function processActiveUsers(users){
     let activeUsers = users.filter( user => {
         return moment(user.last_root_post).valueOf() >= (now - sixDaysInSeconds)
     })
+    accountCreationLastYear = users.length
+    dailyUsersAfterOneYEar = activeUsers.length
     resolve(activeUsers);
   })
 }
 
 function getLatestPost(users){
-  // console.log(users)
   var userNames = users.map(user => user.name);
-  console.log(userNames);
   return new Promise((resolvePosts, reject) => {
       let posts = [];
       userNames.forEach(function (userName,i,arr){
@@ -66,13 +77,6 @@ function getLatestPost(users){
   })
 }
 
-// get latest post of each user who has post in the last 6 days
-getAniversaryData()
-  .then(data => processNamesToAccounts(data))
-  .then(data => processActiveUsers(data))
-  .then(data => getLatestPost(data))
-  // .then(data => sendVotes(data))
-
   function calcVoteWeight(posts){
     let totalActiveAuthors = posts.length;
     let votesPerDay = 10;
@@ -83,17 +87,18 @@ getAniversaryData()
   function sendVotes(activePosts){
 
       let voteWeightPerUser = calcVoteWeight(activePosts);
-
       let votePromises = [];
+
       return new Promise((resolveVotes, reject) => {
           activePosts.forEach((post,i,arr) => {
               let permalink = post[0].url.substring(1)
               let author = post[0].author
               let voteWeight = voteWeightPerUser
-              vote.Promises.push(
+              votePromises.push(
                   new Promise((resolve, reject) => {
                       steem.broadcast.vote(BOT_ACCOUNT_WIF, BOT_ACCOUNT_NAME, author, permalink, voteWeight, function(err, result) {
-                          resolve(result);
+
+                          resolve([err,result]);
                       });
                   })
               )
@@ -103,51 +108,68 @@ getAniversaryData()
   }
 
   function randomString() {
-    return '_' + Math.random().toString(36).substr(2, 16);
-  }
-  //
-  // let commentTitle = 'Your Steem-Versay has arrived, Congratulations';
-  // let uniqueString = randomString();
-  // let beneficiaries = [];
-  // beneficiaries.push({
-  //       account: 'sambillingham',
-  //       weight: 100*25
-  //   });
-  // let operations = [
-  //         ['comment',
-  //             {
-  //                 parent_author: 'sambillingham',
-  //                 parent_permlink: '20171226t151234088z-post',
-  //                 author: BOT_ACCOUNT_NAME,
-  //                 permlink: 'thisisjustatestyoucantotallyignoreitokaythanksplz',
-  //                 title: commentTitle,
-  //                 body: 'This Is Just A Test. Hey!',
-  //                 json_metadata : JSON.stringify({
-  //                 tags: 'steem-versary',
-  //                 app: 'steem-versary'
-  //                 })
-  //             }
-  //         ],
-  //         ['comment_options', {
-  //             author: BOT_ACCOUNT_NAME,
-  //             permlink: 'thisisjustatestyoucantotallyignoreitokaythanksplz',
-  //             max_accepted_payout: '100000.000 SBD',
-  //             percent_steem_dollars: 10000,
-  //             allow_votes: true,
-  //             allow_curation_rewards: true,
-  //             extensions: [
-  //                 [0, {
-  //                     beneficiaries: beneficiaries
-  //                 }]
-  //             ]
-  //         }]
-  //     ];
-  //     steem.broadcast.send(
-  //         { operations: operations, extensions: [] },
-  //         { posting: BOT_ACCOUNT_WIF },
-  //         function(err, result) {
-  //   console.log(err, result);
-  // });
+    let string = ''
+    let allowedChars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    for (var i = 0; i < 32; i++){
+      string += allowedChars.charAt(Math.floor(Math.random() * allowedChars.length));
+    }
+    return string;
+}
 
-// vote with bot account
-// add comment with bot account
+  function sendComments(activePosts){
+      let commentPromises = [];
+      let commentTitle = 'Your Steem-Versay has arrived, Congratulations';
+      let beneficiaries = [];
+      beneficiaries.push({
+        account: 'sambillingham',
+        weight: 100*25
+      });
+
+      return new Promise((resolveComments, reject) => {
+        activePosts.forEach((post,i,arr) => {
+            let uniqueString = randomString();
+            let permalink = post[0].url.substring(1)
+            let author = post[0].author
+            let operations = [
+              ['comment',
+              {
+                parent_author: author,
+                parent_permlink: permalink,
+                author: BOT_ACCOUNT_NAME,
+                permlink: uniqueString,
+                title: commentTitle,
+                body: `**Congratulations!** 🎉  Your Steem-versay has arrived. One year ago today you made your steem account along with ${accountCreationLastYear} others. You are one of ${dailyUsersAfterOneYEar} users who have posted in the last week. Well done you. <br><br>I've upvoted your post, I hope it helps. Happy Steem-versay ✌️; <br><br> p.s I'm a brand new bot and this is my first day of posting :)`,
+                json_metadata : JSON.stringify({
+                  tags: 'steem-versary',
+                  app: 'steem-versary'
+                })
+              }
+            ],
+            ['comment_options', {
+              author: BOT_ACCOUNT_NAME,
+              permlink: uniqueString,
+              max_accepted_payout: '100000.000 SBD',
+              percent_steem_dollars: 10000,
+              allow_votes: true,
+              allow_curation_rewards: true,
+              extensions: [
+                [0, {
+                  beneficiaries: beneficiaries
+                }]
+              ]
+            }]
+          ];
+          commentPromises.push(
+              new Promise((resolve, reject) => {
+                  steem.broadcast.send(
+                    { operations: operations, extensions: [] },
+                    { posting: BOT_ACCOUNT_WIF },
+                    (err, result) => {
+                        resolve(result);
+                    })
+              })
+          )
+          })
+          Promise.all(commentPromises).then(data => resolveComments(data))
+      })
+  }

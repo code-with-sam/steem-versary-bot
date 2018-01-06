@@ -8,7 +8,7 @@ const config = require('./config')
 
 
 const BOT_ACCOUNT_NAME = config.username;
-const BOT_ACCOUNT_WIF = config.wif
+const BOT_ACCOUNT_WIF = config.postingKey
 const API_MIN_VOTE_INTERVAL = 4000
 const API_MIN_COMMENT_INTERVAL = 25000
 

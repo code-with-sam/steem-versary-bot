@@ -126,7 +126,7 @@ function getLatestPost(users){
 
   function sendComments(activePosts){
       let commentPromises = [];
-      let commentTitle = 'Your Steem-Versay has arrived, Congratulations';
+      let commentTitle = 'Your Steemversay has arrived, Congratulations';
       let beneficiaries = [];
       beneficiaries.push({
         account: config.beneficiary,

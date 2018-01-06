@@ -133,6 +133,10 @@ function getLatestPost(users){
         weight: 100*10
       });
 
+      var start = moment('20180103', 'YYYYMMDD');
+      var now = moment();
+      var daysSinceStart = now.diff(start, 'days') + 1
+
       return new Promise((resolveComments, reject) => {
         activePosts.forEach((post,i,arr) => {
             let uniqueString = randomString();
@@ -149,7 +153,7 @@ function getLatestPost(users){
                 author: BOT_ACCOUNT_NAME,
                 permlink: uniqueString,
                 title: commentTitle,
-                body: `**Congratulations!** 🎉  Your Steemversay has arrived. One year ago today you made your steem account along with ${accountCreationLastYear} others. You are one of ${dailyUsersAfterOneYEar} users who have posted in the last week. Well done you. <br><br>I've upvoted your post, I hope it helps. Happy Steemversay ✌️; <br><br> p.s I'm a brand new bot and this is my first day of posting :)`,
+                body: `**Congratulations!** 🎉  Your Steemversay has arrived. One year ago today you made your steem account along with ${accountCreationLastYear} others. You are one of ${dailyUsersAfterOneYEar} users who have posted in the last week. Well done you. <br><br>I've upvoted your post, I hope it helps. Happy Steemversay ✌️; <br><br> p.s I'm a new bot, I've only been alive ${daysSinceStart} days :)`,
                 json_metadata : JSON.stringify({
                   tags: 'steem-versary',
                   app: 'steem-versary'

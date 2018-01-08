@@ -9,8 +9,8 @@ const config = require('./config')
 
 const BOT_ACCOUNT_NAME = config.username;
 const BOT_ACCOUNT_WIF = config.postingKey
-const API_MIN_VOTE_INTERVAL = 4000
-const API_MIN_COMMENT_INTERVAL = 25000
+const API_MIN_VOTE_INTERVAL = 30000
+const API_MIN_COMMENT_INTERVAL = 60000
 
 let accountCreationLastYear;
 let dailyUsersAfterOneYEar;
@@ -41,6 +41,8 @@ function getAniversaryData(){
 }
 
 function processNamesToAccounts(data){
+  steem.api.setOptions({ url: 'wss://rpc.buildteam.io' });
+  
   let json = JSON.parse(data)
   let userNames = json.rows.map(user => user.new_account_name)
   return new Promise((resolve, reject) => {
@@ -153,7 +155,7 @@ function getLatestPost(users){
                 author: BOT_ACCOUNT_NAME,
                 permlink: uniqueString,
                 title: commentTitle,
-                body: `**Congratulations!** 🎉  Your Steemversay has arrived. One year ago today you made your steem account along with ${accountCreationLastYear} others. You are one of ${dailyUsersAfterOneYEar} users who have posted in the last week. Well done you. <br><br>I've upvoted your post, I hope it helps. Happy Steemversay ✌️; <br><br> p.s I'm a new bot, I've only been alive ${daysSinceStart} days :)`,
+                body: `**Congratulations!** 🎉  Your Steemversay has arrived. One year ago today you made your steem account along with ${accountCreationLastYear} others. You are one of ${dailyUsersAfterOneYEar} users who have posted in the last week. Well done you. <br><br>I've upvoted your post, I hope it helps. Happy Steemversay ✌️; <br><br> p.s I'm a new bot, I've only been alive ${daysSinceStart} days :)<br>Learn more about SteemVersary and view awards at [Steemversary](https://code-with-sam.github.io/steem-versary/) `,
                 json_metadata : JSON.stringify({
                   tags: 'steem-versary',
                   app: 'steem-versary'
